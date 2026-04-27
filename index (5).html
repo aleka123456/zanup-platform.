@@ -1079,42 +1079,49 @@ async function sendMessage() {
   const input = document.getElementById('chatInput');
   const text = input.value.trim();
   if (!text) return;
+
+  // 1. Добавляем сообщение пользователя в чат
+  addMsg('user', text);
   input.value = '';
   input.style.height = 'auto';
 
-  addMsg('user', text);
-  chatHistory.push({ role: 'user', parts: [{ text }] });
-
+  // 2. Показываем анимацию "печатает..."
   const typingId = addTyping();
+
   try {
-    const res = await fetch(GEMINI_URL, {
+    // 3. Запрос к ИИ
+    const response = await fetch(API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${API_KEY}`
+      },
       body: JSON.stringify({
-        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-        contents: chatHistory
+        model: "gpt-3.5-turbo", // или другая модель
+        messages: [
+          { role: "system", content: "Ты — правовой ассистент ZanUp. Отвечай кратко и понятно на основе законов Казахстана." },
+          { role: "user", content: text }
+        ]
       })
     });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      removeTyping(typingId);
-      const code = res.status;
-      let msg = '';
-      if (code === 429) msg = '⏳ Превышен лимит запросов. Подожди 1 минуту и попробуй снова.';
-      else if (code === 400) msg = '❌ Ошибка запроса (400). Попробуй переформулировать вопрос.';
-      else if (code === 403) msg = '🔑 Ошибка API ключа (403). Ключ недействителен или заблокирован.';
-      else msg = `Ошибка сервера: ${code}. ${JSON.stringify(err?.error?.message || '')}`;
-      addMsg('assistant', msg);
-      return;
+
+    if (!response.ok) {
+      throw new Error(`Ошибка сервера: ${response.status}`);
     }
-    const data = await res.json();
+
+    const data = await response.json();
+    const aiResponse = data.choices[0].message.content;
+
+    // 4. Убираем анимацию и выводим ответ
     removeTyping(typingId);
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Произошла ошибка. Попробуй снова.';
-    addMsg('assistant', reply);
-    chatHistory.push({ role: 'model', parts: [{ text: reply }] });
+    addMsg('assistant', aiResponse);
+
   } catch (e) {
     removeTyping(typingId);
-    addMsg('assistant', `<strong>Ошибка:</strong> ${e.message}. Возможно, браузер блокирует запрос (CORS). Попробуй открыть сайт в другом браузере или отключи расширения.`);
+    console.error("Ошибка запроса:", e);
+    
+    // Вывод понятной ошибки для пользователя
+    addMsg('assistant', `<strong>Ошибка:</strong> ${e.message}. Проверьте подключение к интернету или настройки API-ключа. Если вы запускаете файл просто с компьютера, браузер может блокировать запрос из-за политики CORS.`);
   }
 }
 
