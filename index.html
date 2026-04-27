@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZanUp — Правовой ассистент</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0c0c0f;
+  --bg2: #131318;
+  --bg3: #1a1a22;
+  --gold: #c9a84c;
+  --gold-dim: rgba(201,168,76,0.15);
+  --gold-border: rgba(201,168,76,0.25);
+  --white: #f0ece2;
+  --muted: rgba(240,236,226,0.45);
+  --muted2: rgba(240,236,226,0.2);
+  --red: #c0392b;
+  --green: #27ae60;
+  --radius: 8px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--white);font-family:'Cormorant Garamond',serif;min-height:100vh;overflow-x:hidden}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 2rem;height:60px;
+  background:rgba(12,12,15,0.85);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.nav-logo{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1.6rem;letter-spacing:0.06em;color:var(--white);
+  cursor:pointer;
+}
+.nav-logo span{color:var(--gold)}
+.nav-tabs{display:flex;gap:0.25rem}
+.nav-tab{
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.68rem;letter-spacing:0.12em;
+  text-transform:uppercase;color:var(--muted);
+  padding:0.45rem 1rem;border-radius:4px;
+  cursor:pointer;transition:all 0.2s;border:none;background:none;
+}
+.nav-tab:hover{color:var(--white);background:rgba(255,255,255,0.05)}
+.nav-tab.active{color:var(--gold);background:var(--gold-dim)}
+
+/* MAIN */
+main{padding-top:60px;min-height:100vh}
+.page{display:none;animation:fadeIn 0.35s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ========== HOME ========== */
+.home-hero{
+  min-height:calc(100vh - 60px);
+  display:flex;flex-direction:column;justify-content:center;
+  padding:4rem 6vw;position:relative;overflow:hidden;
+}
+.home-hero::before{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 60% 70% at 70% 40%,rgba(201,168,76,0.07) 0%,transparent 65%),
+    radial-gradient(ellipse 40% 50% at 20% 80%,rgba(100,80,200,0.04) 0%,transparent 60%);
+}
+.home-tag{
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.68rem;letter-spacing:0.3em;color:var(--gold);
+  text-transform:uppercase;margin-bottom:2rem;
+}
+.home-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(4.5rem,12vw,10rem);
+  line-height:0.88;letter-spacing:0.01em;
+  margin-bottom:2.5rem;
+}
+.home-title span{color:var(--gold);display:block}
+.home-sub{
+  font-size:clamp(1.1rem,2vw,1.5rem);
+  font-weight:300;font-style:italic;
+  color:var(--muted);max-width:500px;line-height:1.65;
+  margin-bottom:3.5rem;
+}
+.home-actions{display:flex;gap:1rem;flex-wrap:wrap}
+.btn{
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.72rem;letter-spacing:0.15em;text-transform:uppercase;
+  padding:0.9rem 2rem;border-radius:var(--radius);
+  cursor:pointer;transition:all 0.25s;border:1px solid transparent;
+}
+.btn-gold{background:var(--gold);color:#0c0c0f;border-color:var(--gold)}
+.btn-gold:hover{background:transparent;color:var(--gold)}
+.btn-outline{background:transparent;color:var(--white);border-color:rgba(255,255,255,0.2)}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+
+.home-cards{
+  padding:4rem 6vw 6rem;
+  display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;
+}
+.home-card{
+  background:var(--bg2);border:1px solid rgba(255,255,255,0.06);
+  border-radius:var(--radius);padding:2rem;
+  cursor:pointer;transition:all 0.25s;
+}
+.home-card:hover{border-color:var(--gold-border);transform:translateY(-3px)}
+.home-card-icon{font-size:2rem;margin-bottom:1.2rem}
+.home-card h3{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1.6rem;letter-spacing:0.04em;margin-bottom:0.75rem;
+}
+.home-card p{font-size:0.95rem;font-weight:300;line-height:1.7;color:var(--muted)}
+.home-card-tag{
+  margin-top:1.5rem;
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.62rem;letter-spacing:0.2em;
+  text-transform:uppercase;color:var(--gold);
+}
+
+/* ========== AI CHAT ========== */
+.chat-layout{
+  display:grid;grid-template-columns:260px 1fr;
+  height:calc(100vh - 60px);
+}
+.chat-sidebar{
+  background:var(--bg2);
+  border-right:1px solid rgba(255,255,255,0.06);
+  padding:1.5rem;overflow-y:auto;
+  display:flex;flex-direction:column;gap:0.5rem;
+}
+.sidebar-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.6rem;letter-spacing:0.25em;text-transform:uppercase;
+  color:var(--muted);padding:0.5rem 0.75rem;
+}
+.sidebar-topic{
+  font-size:0.9rem;font-weight:300;color:var(--muted);
+  padding:0.6rem 0.75rem;border-radius:5px;
+  cursor:pointer;transition:all 0.2s;line-height:1.4;
+  border:1px solid transparent;
+}
+.sidebar-topic:hover{color:var(--white);background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.08)}
+.sidebar-topic.active{color:var(--gold);background:var(--gold-dim);border-color:var(--gold-border)}
+
+.chat-main{
+  display:flex;flex-direction:column;
+  background:var(--bg);
+}
+.chat-header{
+  padding:1.25rem 2rem;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+  display:flex;align-items:center;gap:1rem;
+}
+.chat-header h2{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1.4rem;letter-spacing:0.05em;
+}
+.ai-badge{
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;
+  background:var(--gold-dim);color:var(--gold);
+  padding:0.25rem 0.6rem;border-radius:3px;
+  border:1px solid var(--gold-border);
+}
+.chat-messages{
+  flex:1;overflow-y:auto;
+  padding:2rem;
+  display:flex;flex-direction:column;gap:1.5rem;
+}
+.msg{display:flex;gap:1rem;align-items:flex-start;max-width:720px}
+.msg.user{flex-direction:row-reverse;margin-left:auto}
+.msg-avatar{
+  width:34px;height:34px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;font-size:0.85rem;
+  font-family:'JetBrains Mono',monospace;font-weight:500;
+}
+.msg.assistant .msg-avatar{background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold-border)}
+.msg.user .msg-avatar{background:rgba(255,255,255,0.08);color:var(--white)}
+.msg-bubble{
+  background:var(--bg2);border:1px solid rgba(255,255,255,0.06);
+  border-radius:var(--radius);padding:1rem 1.25rem;
+  font-size:0.98rem;font-weight:300;line-height:1.75;
+  color:var(--white);
+}
+.msg.user .msg-bubble{background:var(--bg3);border-color:rgba(255,255,255,0.1)}
+.msg-bubble strong{color:var(--gold);font-weight:600}
+.msg-bubble .law-ref{
+  display:inline-block;margin-top:0.6rem;
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;
+  color:var(--muted);
+}
+.typing-dots{display:flex;gap:4px;padding:0.25rem 0}
+.typing-dots span{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--gold);opacity:0.5;
+  animation:dot 1.2s infinite;
+}
+.typing-dots span:nth-child(2){animation-delay:0.2s}
+.typing-dots span:nth-child(3){animation-delay:0.4s}
+@keyframes dot{0%,80%,100%{transform:scale(0.6);opacity:0.3}40%{transform:scale(1);opacity:1}}
+
+.chat-input-area{
+  padding:1.25rem 2rem;
+  border-top:1px solid rgba(255,255,255,0.06);
+  background:var(--bg2);
+}
+.chat-input-row{display:flex;gap:0.75rem;align-items:flex-end}
+.chat-textarea{
+  flex:1;background:var(--bg3);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:var(--radius);
+  padding:0.85rem 1.1rem;
+  font-family:'Cormorant Garamond',serif;
+  font-size:1rem;font-weight:300;color:var(--white);
+  resize:none;min-height:48px;max-height:130px;
+  outline:none;transition:border 0.2s;line-height:1.5;
+}
+.chat-textarea:focus{border-color:var(--gold-border)}
+.chat-textarea::placeholder{color:var(--muted)}
+.send-btn{
+  width:48px;height:48px;border-radius:var(--radius);
+  background:var(--gold);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.2s;flex-shrink:0;
+}
+.send-btn:hover{background:#b8943e;transform:scale(1.05)}
+.send-btn svg{width:18px;height:18px;fill:none;stroke:#0c0c0f;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.chat-hint{
+  margin-top:0.6rem;
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.6rem;letter-spacing:0.12em;
+  color:var(--muted);text-align:center;
+}
+
+/* ========== LAWS ========== */
+.laws-page{
+  min-height:calc(100vh - 60px);
+  background:var(--bg);
+}
+.laws-tabs-header{
+  background:var(--bg2);
+  border-bottom:1px solid rgba(255,255,255,0.06);
+  padding:1.5rem 3rem 0;
+  position:sticky;top:60px;z-index:10;
+}
+.laws-tabs-title{
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.62rem;letter-spacing:0.28em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:1.2rem;
+}
+.laws-tabs-row{
+  display:flex;gap:0.25rem;flex-wrap:wrap;
+}
+.law-tab{
+  display:flex;flex-direction:column;gap:0.2rem;
+  padding:0.75rem 1.25rem;
+  border-radius:6px 6px 0 0;
+  cursor:pointer;transition:all 0.22s;
+  border:1px solid transparent;border-bottom:none;
+  background:transparent;color:var(--muted);
+  position:relative;bottom:-1px;
+}
+.law-tab:hover{background:rgba(255,255,255,0.05);color:var(--white)}
+.law-tab.active{
+  background:var(--bg);
+  border-color:rgba(255,255,255,0.08);
+  border-bottom-color:var(--bg);
+  color:var(--white);
+}
+.law-tab.active .law-tab-name{color:var(--gold)}
+.law-tab-icon{font-size:1.1rem;line-height:1}
+.law-tab-name{
+  font-size:0.82rem;font-weight:400;line-height:1.2;white-space:nowrap;
+}
+.law-tab-year{
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.58rem;color:var(--muted);letter-spacing:0.1em;
+}
+.laws-tab-indicator{
+  position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--gold);border-radius:2px 2px 0 0;
+  transform:scaleX(0);transition:transform 0.22s;
+}
+.law-tab.active .laws-tab-indicator{transform:scaleX(1)}
+
+.laws-body{padding:2.5rem 3rem;max-width:860px;margin:0 auto}
+.law-page-header{margin-bottom:3rem}
+.law-page-tag{
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.65rem;letter-spacing:0.25em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:1rem;
+}
+.law-page-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(2.5rem,5vw,4rem);
+  letter-spacing:0.02em;line-height:1;margin-bottom:1rem;
+}
+.law-page-desc{
+  font-size:1.05rem;font-weight:300;line-height:1.75;color:var(--muted);
+}
+.chapter{margin-bottom:2.5rem}
+.chapter-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1.4rem;letter-spacing:0.04em;
+  color:var(--gold);margin-bottom:1.2rem;
+  padding-bottom:0.6rem;
+  border-bottom:1px solid var(--gold-border);
+}
+.article{
+  background:var(--bg2);border:1px solid rgba(255,255,255,0.06);
+  border-radius:var(--radius);padding:1.4rem 1.6rem;
+  margin-bottom:0.75rem;transition:border 0.2s;
+}
+.article:hover{border-color:var(--gold-border)}
+.article-num{
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:0.5rem;
+}
+.article-title{font-size:1rem;font-weight:600;margin-bottom:0.6rem}
+.article-text{font-size:0.95rem;font-weight:300;line-height:1.8;color:var(--muted)}
+.article-text strong{color:var(--white);font-weight:400}
+.simplified-badge{
+  display:inline-flex;align-items:center;gap:0.4rem;
+  margin-top:0.75rem;
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;
+  color:var(--green);background:rgba(39,174,96,0.1);
+  padding:0.25rem 0.6rem;border-radius:3px;border:1px solid rgba(39,174,96,0.2);
+}
+
+/* ========== TESTS ========== */
+.tests-page{padding:3rem 6vw}
+.tests-header{margin-bottom:3rem}
+.tests-header h1{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(3rem,7vw,5.5rem);
+  line-height:0.9;letter-spacing:0.02em;
+  margin-bottom:1rem;
+}
+.tests-header h1 span{color:var(--gold)}
+.tests-header p{font-size:1.1rem;font-weight:300;color:var(--muted);max-width:520px;line-height:1.7}
+
+.tests-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:1.25rem;margin-bottom:4rem;
+}
+.test-card{
+  background:var(--bg2);border:1px solid rgba(255,255,255,0.06);
+  border-radius:var(--radius);padding:1.75rem;
+  cursor:pointer;transition:all 0.25s;
+}
+.test-card:hover{border-color:var(--gold-border);transform:translateY(-2px)}
+.test-card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem}
+.test-card-emoji{font-size:1.6rem}
+.test-card-level{
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;
+  padding:0.25rem 0.6rem;border-radius:3px;
+}
+.level-easy{color:#27ae60;background:rgba(39,174,96,0.1);border:1px solid rgba(39,174,96,0.2)}
+.level-medium{color:var(--gold);background:var(--gold-dim);border:1px solid var(--gold-border)}
+.level-hard{color:var(--red);background:rgba(192,57,43,0.1);border:1px solid rgba(192,57,43,0.2)}
+
+.test-card h3{font-size:1.15rem;font-weight:600;margin-bottom:0.5rem}
+.test-card p{font-size:0.88rem;font-weight:300;color:var(--muted);line-height:1.6;margin-bottom:1.2rem}
+.test-meta{
+  display:flex;gap:1.2rem;
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.62rem;letter-spacing:0.1em;color:var(--muted);
+}
+
+/* QUIZ */
+.quiz-overlay{
+  display:none;position:fixed;inset:0;z-index:200;
+  background:rgba(10,10,14,0.97);
+  align-items:center;justify-content:center;
+  padding:2rem;
+}
+.quiz-overlay.open{display:flex}
+.quiz-box{
+  background:var(--bg2);border:1px solid rgba(255,255,255,0.08);
+  border-radius:12px;max-width:640px;width:100%;
+  padding:2.5rem;position:relative;
+  animation:fadeIn 0.3s ease;
+}
+.quiz-close{
+  position:absolute;top:1.25rem;right:1.25rem;
+  background:none;border:none;color:var(--muted);
+  font-size:1.4rem;cursor:pointer;transition:color 0.2s;
+}
+.quiz-close:hover{color:var(--white)}
+.quiz-progress-bar{
+  height:3px;background:rgba(255,255,255,0.08);
+  border-radius:2px;margin-bottom:2rem;overflow:hidden;
+}
+.quiz-progress-fill{
+  height:100%;background:var(--gold);
+  border-radius:2px;transition:width 0.4s ease;
+}
+.quiz-counter{
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.65rem;letter-spacing:0.2em;
+  color:var(--gold);margin-bottom:1.25rem;text-transform:uppercase;
+}
+.quiz-question{
+  font-size:clamp(1.1rem,2vw,1.4rem);font-weight:400;
+  line-height:1.55;margin-bottom:2rem;
+}
+.quiz-options{display:flex;flex-direction:column;gap:0.65rem}
+.quiz-option{
+  background:var(--bg3);border:1px solid rgba(255,255,255,0.08);
+  border-radius:var(--radius);padding:1rem 1.25rem;
+  cursor:pointer;transition:all 0.2s;
+  font-size:0.98rem;font-weight:300;line-height:1.5;
+  text-align:left;color:var(--white);
+}
+.quiz-option:hover:not(:disabled){border-color:var(--gold-border);background:var(--gold-dim)}
+.quiz-option.correct{border-color:var(--green)!important;background:rgba(39,174,96,0.12)!important;color:#27ae60}
+.quiz-option.wrong{border-color:var(--red)!important;background:rgba(192,57,43,0.1)!important;color:var(--red)}
+.quiz-option:disabled{cursor:default}
+.quiz-feedback{
+  margin-top:1.25rem;padding:1rem 1.25rem;
+  border-radius:var(--radius);
+  font-size:0.95rem;font-weight:300;line-height:1.6;
+  display:none;
+}
+.quiz-feedback.show{display:block}
+.quiz-feedback.good{background:rgba(39,174,96,0.1);border:1px solid rgba(39,174,96,0.2);color:#4ecb71}
+.quiz-feedback.bad{background:rgba(192,57,43,0.1);border:1px solid rgba(192,57,43,0.2);color:#e07060}
+.quiz-next{
+  margin-top:1.5rem;width:100%;
+  font-family:'JetBrains Mono',monospace;font-size:0.72rem;
+  letter-spacing:0.15em;text-transform:uppercase;
+  padding:0.9rem;border-radius:var(--radius);
+  background:var(--gold);color:#0c0c0f;border:none;cursor:pointer;
+  transition:all 0.2s;display:none;
+}
+.quiz-next:hover{background:#b8943e}
+.quiz-next.show{display:block}
+.quiz-result{text-align:center;padding:1rem 0}
+.quiz-result-score{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:6rem;line-height:1;
+  color:var(--gold);margin-bottom:0.5rem;
+}
+.quiz-result-label{font-size:1.2rem;font-weight:300;color:var(--muted);margin-bottom:2rem}
+.quiz-result-msg{font-size:1.1rem;font-weight:300;line-height:1.65;color:var(--white);margin-bottom:2rem}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.2)}
+
+@media(max-width:768px){
+  .chat-layout{grid-template-columns:1fr}
+  .chat-sidebar{display:none}
+  .home-cards{grid-template-columns:1fr}
+  .laws-tabs-header{padding:1rem 1rem 0}
+  .laws-tabs-row{gap:0.2rem}
+  .law-tab{padding:0.6rem 0.8rem}
+  .law-tab-name{font-size:0.72rem}
+  .laws-body{padding:1.25rem}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo" onclick="showPage('home')">Zan<span>Up</span></div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('home')" data-page="home">Главная</button>
+    <button class="nav-tab" onclick="showPage('ai')" data-page="ai">ИИ Ассистент</button>
+    <button class="nav-tab" onclick="showPage('laws')" data-page="laws">Кодексы</button>
+    <button class="nav-tab" onclick="showPage('tests')" data-page="tests">Тесты</button>
+  </div>
+</nav>
+
+<main>
+
+<!-- HOME -->
+<div id="page-home" class="page active">
+  <div class="home-hero">
+    <p class="home-tag">ZanUp · Правовое просвещение · ИИ</p>
+    <h1 class="home-title">Знай<span>свои права.</span></h1>
+    <p class="home-sub">Искусственный интеллект как персональный правовой ассистент. Кодексы, тесты и ответы на твои вопросы — просто и понятно.</p>
+    <div class="home-actions">
+      <button class="btn btn-gold" onclick="showPage('ai')">Задать вопрос ИИ</button>
+      <button class="btn btn-outline" onclick="showPage('laws')">Изучить кодексы</button>
+    </div>
+  </div>
+  <div class="home-cards">
+    <div class="home-card" onclick="showPage('ai')">
+      <div class="home-card-icon">🤖</div>
+      <h3>ИИ Ассистент</h3>
+      <p>Задай любой правовой вопрос и получи чёткий ответ на основе реальных законов Казахстана — без юридического жаргона.</p>
+      <p class="home-card-tag">→ Спросить сейчас</p>
+    </div>
+    <div class="home-card" onclick="showPage('laws')">
+      <div class="home-card-icon">📖</div>
+      <h3>Кодексы РК</h3>
+      <p>Конституция, Трудовой, Уголовный, Гражданский и другие кодексы — в упрощённом формате с объяснениями.</p>
+      <p class="home-card-tag">→ Открыть кодексы</p>
+    </div>
+    <div class="home-card" onclick="showPage('tests')">
+      <div class="home-card-icon">✅</div>
+      <h3>Тесты</h3>
+      <p>Проверь свои знания по темам: права ребёнка, трудовые права, гражданское право и другие. С объяснениями ответов.</p>
+      <p class="home-card-tag">→ Пройти тест</p>
+    </div>
+  </div>
+</div>
+
+<!-- AI CHAT -->
+<div id="page-ai" class="page">
+  <div class="chat-layout">
+    <div class="chat-sidebar">
+      <div class="sidebar-label">Частые темы</div>
+      <div class="sidebar-topic active" onclick="setTopic(this,'Какие права есть у школьника по закону?')">Права школьника</div>
+      <div class="sidebar-topic" onclick="setTopic(this,'Что делать если нарушают мои трудовые права?')">Трудовые права</div>
+      <div class="sidebar-topic" onclick="setTopic(this,'Что такое буллинг с точки зрения закона?')">Буллинг и закон</div>
+      <div class="sidebar-topic" onclick="setTopic(this,'Какие права есть у потребителя при покупке товара?')">Права потребителя</div>
+      <div class="sidebar-topic" onclick="setTopic(this,'С какого возраста наступает уголовная ответственность в Казахстане?')">Уголовная ответственность</div>
+      <div class="sidebar-topic" onclick="setTopic(this,'Что делать если меня задержала полиция?')">Задержание полицией</div>
+      <div class="sidebar-topic" onclick="setTopic(this,'Какие права есть у меня как у ребёнка в семье?')">Права в семье</div>
+      <div class="sidebar-topic" onclick="setTopic(this,'Как подать жалобу на учителя или школу?')">Жалоба на школу</div>
+      <div class="sidebar-topic" onclick="setTopic(this,'Что такое гражданские права и свободы?')">Гражданские свободы</div>
+      <div class="sidebar-topic" onclick="setTopic(this,'Как защитить свои персональные данные в интернете по закону?')">Данные и интернет</div>
+    </div>
+    <div class="chat-main">
+      <div class="chat-header">
+        <h2>ИИ Правовой Ассистент</h2>
+        <span class="ai-badge">AI · Онлайн</span>
+      </div>
+      <div class="chat-messages" id="chatMessages">
+        <div class="msg assistant">
+          <div class="msg-avatar">Z</div>
+          <div class="msg-bubble">
+            Привет! Я правовой ассистент <strong>ZanUp</strong>. Я помогу разобраться в законах Казахстана простым языком.<br><br>
+            Задай любой вопрос о своих правах — например, о правах в школе, трудовых правах, правах потребителя или семейных отношениях.<br><br>
+            <span class="law-ref">⚠ Это информация для просвещения, не юридическая консультация</span>
+          </div>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <div class="chat-input-row">
+          <textarea class="chat-textarea" id="chatInput" placeholder="Напиши свой правовой вопрос..." rows="1"
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}"
+            oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+          <button class="send-btn" onclick="sendMessage()">
+            <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+        <p class="chat-hint">Enter — отправить · Shift+Enter — перенос строки</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LAWS -->
+<div id="page-laws" class="page">
+  <div class="laws-page">
+    <div class="laws-tabs-header">
+      <div class="laws-tabs-title">Нормативные правовые акты РК</div>
+      <div class="laws-tabs-row" id="lawsTabsRow">
+        <div class="law-tab active" onclick="showCode(this,'constitution')">
+          <div class="laws-tab-indicator"></div>
+          <span class="law-tab-icon">🏛️</span>
+          <span class="law-tab-name">Конституция</span>
+          <span class="law-tab-year">1995</span>
+        </div>
+        <div class="law-tab" onclick="showCode(this,'child')">
+          <div class="laws-tab-indicator"></div>
+          <span class="law-tab-icon">🧒</span>
+          <span class="law-tab-name">Права ребёнка</span>
+          <span class="law-tab-year">2002</span>
+        </div>
+        <div class="law-tab" onclick="showCode(this,'labor')">
+          <div class="laws-tab-indicator"></div>
+          <span class="law-tab-icon">💼</span>
+          <span class="law-tab-name">Трудовой кодекс</span>
+          <span class="law-tab-year">2015</span>
+        </div>
+        <div class="law-tab" onclick="showCode(this,'criminal')">
+          <div class="laws-tab-indicator"></div>
+          <span class="law-tab-icon">⚖️</span>
+          <span class="law-tab-name">Уголовный кодекс</span>
+          <span class="law-tab-year">2014</span>
+        </div>
+        <div class="law-tab" onclick="showCode(this,'admin')">
+          <div class="laws-tab-indicator"></div>
+          <span class="law-tab-icon">🚔</span>
+          <span class="law-tab-name">КоАП</span>
+          <span class="law-tab-year">2014</span>
+        </div>
+        <div class="law-tab" onclick="showCode(this,'civil')">
+          <div class="laws-tab-indicator"></div>
+          <span class="law-tab-icon">📜</span>
+          <span class="law-tab-name">Гражданский кодекс</span>
+          <span class="law-tab-year">1994</span>
+        </div>
+      </div>
+    </div>
+    <div class="laws-body" id="lawsContent"></div>
+  </div>
+</div>
+
+<!-- TESTS -->
+<div id="page-tests" class="page">
+  <div class="tests-page">
+    <div class="tests-header">
+      <h1>Тесты по<br><span>правам</span></h1>
+      <p>Проверь свои знания. После каждого ответа — объяснение с отсылкой к закону.</p>
+    </div>
+    <div class="tests-grid" id="testsGrid"></div>
+  </div>
+</div>
+
+</main>
+
+<!-- QUIZ MODAL -->
+<div class="quiz-overlay" id="quizOverlay">
+  <div class="quiz-box" id="quizBox">
+    <button class="quiz-close" onclick="closeQuiz()">✕</button>
+    <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="quizProgress"></div></div>
+    <div id="quizInner"></div>
+  </div>
+</div>
+
+<script>
+// ==================== NAVIGATION ====================
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.querySelector(`[data-page="${name}"]`).classList.add('active');
+  if (name === 'laws') renderCurrentCode();
+  if (name === 'tests') renderTests();
+}
+
+// ==================== LAWS DATA ====================
+const LAWS = {
+  constitution: {
+    tag: 'Конституция Республики Казахстан · 1995',
+    title: 'Конституция РК',
+    desc: 'Основной закон страны. Определяет права и свободы каждого человека, устройство государства и принципы правового общества.',
+    chapters: [
+      {
+        title: 'Глава 2 · Права и свободы человека',
+        articles: [
+          { num: 'Статья 10', title: 'Гражданство', text: 'Гражданин Республики Казахстан не может быть лишён гражданства. Республика гарантирует своим гражданам защиту и покровительство за её пределами.', simple: 'Никто не может лишить тебя гражданства — это прямо запрещено главным законом страны.' },
+          { num: 'Статья 12', title: 'Права и свободы человека', text: 'В Республике Казахстан признаются и гарантируются права и свободы человека в соответствии с Конституцией. Права и свободы человека принадлежат каждому от рождения, признаются абсолютными и неотчуждаемыми.', simple: 'Твои права есть у тебя с рождения. Государство обязано их признавать и защищать.' },
+          { num: 'Статья 14', title: 'Равенство перед законом', text: 'Все равны перед законом и судом. Никто не может подвергаться какой-либо дискриминации по мотивам происхождения, социального, должностного и имущественного положения, пола, расы, национальности, языка, отношения к религии.', simple: 'Закон равен для всех без исключения. Любая дискриминация — незаконна.' },
+          { num: 'Статья 15', title: 'Право на жизнь', text: 'Каждый имеет право на жизнь. Никто не вправе произвольно лишать человека жизни. Смертная казнь запрещается.', simple: 'Жизнь каждого человека защищена законом. Смертная казнь в Казахстане запрещена.' },
+          { num: 'Статья 17', title: 'Неприкосновенность личности', text: 'Достоинство человека неприкосновенно. Никто не должен подвергаться пыткам, насилию, другому жестокому или унижающему человеческое достоинство обращению или наказанию.', simple: 'Тебя никто не имеет права унижать, применять насилие или пытки — это запрещено Конституцией.' },
+          { num: 'Статья 25', title: 'Неприкосновенность жилища', text: 'Жилище неприкосновенно. Лишение жилища допускается только по решению суда. Проникновение в жилище, производство его осмотра и обыска допускаются лишь в случаях и порядке, установленных законом.', simple: 'Никто не может войти в твой дом, обыскать его без решения суда — это нарушение Конституции.' },
+          { num: 'Статья 30', title: 'Право на образование', text: 'Гражданам гарантируется бесплатное среднее образование в государственных учебных заведениях. Среднее образование обязательно.', simple: 'Бесплатное школьное образование — твоё конституционное право. Государство обязано его обеспечить.' },
+        ]
+      }
+    ]
+  },
+  child: {
+    tag: 'Закон РК "О правах ребёнка" · 2002',
+    title: 'Права ребёнка',
+    desc: 'Специальный закон, защищающий права детей и подростков. Каждый человек до 18 лет находится под особой защитой государства.',
+    chapters: [
+      {
+        title: 'Основные права ребёнка',
+        articles: [
+          { num: 'Статья 9', title: 'Право на защиту от насилия', text: 'Ребёнок имеет право на защиту от всех форм физического или психологического насилия, оскорбления, эксплуатации и дискриминации.', simple: 'Буллинг, унижение, физическое насилие — всё это нарушение закона. Ты имеешь право на защиту.' },
+          { num: 'Статья 10', title: 'Право на образование', text: 'Ребёнок имеет право на получение образования. Принудительный труд детей запрещается.', simple: 'Ты должен учиться — это твоё право. Заставлять работать вместо учёбы — незаконно.' },
+          { num: 'Статья 11', title: 'Право на выражение мнения', text: 'Ребёнок имеет право свободно выражать своё мнение. Его мнение должно приниматься во внимание в семье и обществе.', simple: 'Твоё мнение имеет значение. Никто не вправе заставить тебя молчать о важных для тебя вещах.' },
+          { num: 'Статья 16', title: 'Право на личную жизнь', text: 'Ребёнок имеет право на личную жизнь, неприкосновенность корреспонденции и личного пространства.', simple: 'Твои личные сообщения, дневник, личное пространство — под защитой закона.' },
+          { num: 'Статья 21', title: 'Защита от эксплуатации', text: 'Запрещается использование ребёнка в деятельности, наносящей вред его здоровью, нравственному и духовному развитию.', simple: 'Тебя не могут использовать в том, что причиняет вред твоему здоровью или развитию.' },
+        ]
+      }
+    ]
+  },
+  labor: {
+    tag: 'Трудовой кодекс Республики Казахстан · № 414-V от 23.11.2015',
+    title: 'Трудовой кодекс',
+    desc: 'Регулирует отношения между работниками и работодателями. Защищает права каждого, кто работает официально. Актуальная редакция 2026 года.',
+    chapters: [
+      {
+        title: 'Основные трудовые права',
+        articles: [
+          { num: 'Статья 22', title: 'Основные права работника', text: 'Работник вправе заключать, изменять и расторгать трудовой договор. Имеет право на своевременную и в полном объёме выплату заработной платы, на безопасные условия труда, на защиту от дискриминации.', simple: 'Тебя обязаны официально оформить, платить зарплату вовремя и обеспечить безопасное место работы.' },
+          { num: 'Статья 68', title: 'Нормальная продолжительность рабочего времени', text: 'Нормальная продолжительность рабочего времени не должна превышать сорока часов в неделю. Для работников, не достигших восемнадцати лет, устанавливается сокращённая продолжительность рабочего времени.', simple: 'Больше 40 часов в неделю работать незаконно. Для подростков норма ещё меньше — это защита здоровья.' },
+          { num: 'Статья 88', title: 'Продолжительность основного оплачиваемого отпуска', text: 'Основной оплачиваемый ежегодный трудовой отпуск работникам предоставляется продолжительностью двадцать четыре календарных дня, если большее количество дней не предусмотрено Кодексом или трудовым договором.', simple: 'Минимум 24 дня оплачиваемого отпуска в год — гарантия закона для каждого работника.' },
+          { num: 'Статья 179', title: 'Особенности труда несовершеннолетних', text: 'Не допускается заключение трудового договора с лицами до шестнадцати лет. Лица, достигшие пятнадцати лет, могут заключать трудовой договор с письменного согласия одного из родителей.', simple: 'Официально работать можно с 15 лет — только с письменного согласия родителей. С 16 лет — самостоятельно.' },
+        ]
+      }
+    ]
+  },
+  criminal: {
+    tag: 'Уголовный кодекс Республики Казахстан · № 226-V от 03.07.2014',
+    title: 'Уголовный кодекс',
+    desc: 'Определяет, какие действия являются преступлениями и какая ответственность за них предусмотрена. Важно знать — чтобы защищать себя и понимать границы закона.',
+    chapters: [
+      {
+        title: 'Глава 1 · Возраст уголовной ответственности',
+        articles: [
+          { num: 'Статья 15', title: 'Возраст уголовной ответственности', text: 'Уголовной ответственности подлежит лицо, достигшее ко времени совершения уголовного правонарушения шестнадцатилетнего возраста. Лица, достигшие ко времени совершения преступления четырнадцатилетнего возраста, подлежат ответственности за убийство, умышленное причинение тяжкого вреда здоровью, кражу, грабёж, разбой, вымогательство, хулиганство при отягчающих обстоятельствах.', simple: 'С 16 лет — ответственность за любые преступления. С 14 лет — уже за тяжкие: убийство, кражу, грабёж, разбой и хулиганство с насилием.' },
+        ]
+      },
+      {
+        title: 'Глава 2 · Преступления против личности',
+        articles: [
+          { num: 'Статья 109-1', title: 'Побои', text: 'Нанесение побоев или совершение иных насильственных действий, причинивших физическую боль, но не повлёкших последствий, предусмотренных статьёй 108 настоящего Кодекса, — наказывается штрафом либо привлечением к общественным работам, либо арестом на срок до 75 суток.', simple: 'Ударить человека — уже преступление. Даже один удар, причинивший боль, — это статья УК РК.' },
+          { num: 'Статья 110', title: 'Истязание', text: 'Систематическое нанесение побоев либо иные насильственные действия, причиняющие физические или психические страдания, — наказываются ограничением свободы на срок до трёх лет либо лишением свободы на тот же срок.', simple: 'Систематическое насилие или психологические мучения — это истязание. Наказание до 3 лет лишения свободы.' },
+          { num: 'Статья 115', title: 'Угроза', text: 'Угроза убийством или причинением тяжкого вреда здоровью, если имелись основания опасаться осуществления этой угрозы, — наказывается штрафом либо исправительными работами, либо ограничением свободы на срок до двух лет.', simple: 'Угрожать убийством — это уже преступление, даже если никто не пострадал. Угрозы в твой адрес — повод обратиться в полицию.' },
+          { num: 'Статья 115-1', title: 'Сталкинг', text: 'Преследование физического лица, выражающееся в систематических действиях: слежка, нежелательные контакты, угрозы — наказывается штрафом либо ограничением свободы до одного года.', simple: 'Если тебя систематически преследуют, следят или навязываются — это сталкинг, уголовная статья.' },
+        ]
+      },
+      {
+        title: 'Глава 3 · Преступления против собственности',
+        articles: [
+          { num: 'Статья 187', title: 'Мелкое хищение', text: 'Мелкое хищение, то есть кража, мошенничество, присвоение или растрата чужого имущества, совершённые в незначительном размере, — наказывается штрафом до 80 МРП либо общественными работами до 80 часов, либо арестом до 20 суток.', simple: 'Украсть что-то небольшое — уже правонарушение. Мелкое хищение карается штрафом или арестом до 20 суток.' },
+          { num: 'Статья 188', title: 'Кража', text: 'Кража, то есть тайное хищение чужого имущества, — наказывается штрафом до 1000 МРП либо общественными работами до 800 часов, либо ограничением свободы до трёх лет, либо лишением свободы на тот же срок.', simple: 'Украсть чужое имущество — серьёзное преступление. Наказание до 3 лет лишения свободы или большой штраф.' },
+          { num: 'Статья 190', title: 'Мошенничество', text: 'Мошенничество, то есть хищение чужого имущества или приобретение права на чужое имущество путём обмана или злоупотребления доверием, — наказывается штрафом либо исправительными работами, либо ограничением свободы, либо лишением свободы до трёх лет.', simple: 'Обмануть человека ради денег или имущества — мошенничество. Интернет-обман тоже попадает под эту статью.' },
+          { num: 'Статья 191', title: 'Грабёж', text: 'Грабёж, то есть открытое хищение чужого имущества, — наказывается штрафом либо исправительными работами, либо ограничением свободы на срок до четырёх лет, либо лишением свободы на тот же срок.', simple: 'Отнять вещь у человека открыто — грабёж. Это серьёзнее кражи и карается до 4 лет лишения свободы.' },
+        ]
+      }
+    ]
+  },
+  admin: {
+    tag: 'Кодекс РК об административных правонарушениях · № 235-V от 05.07.2014',
+    title: 'КоАП РК',
+    desc: 'Административная ответственность — это не уголовная, но тоже серьёзно: штрафы, аресты до 30 суток, общественные работы. Важно знать, что является правонарушением.',
+    chapters: [
+      {
+        title: 'Глава 1 · Основы административной ответственности',
+        articles: [
+          { num: 'Статья 29', title: 'Возраст административной ответственности', text: 'Административной ответственности подлежит лицо, достигшее к моменту совершения административного правонарушения шестнадцатилетнего возраста.', simple: 'С 16 лет ты несёшь административную ответственность сам. До 16 лет — ответственность несут родители или законные представители.' },
+          { num: 'Статья 50', title: 'Виды административных взысканий', text: 'За административные правонарушения могут применяться: предупреждение, административный штраф, конфискация предмета правонарушения, лишение специального права, административный арест, административное выдворение.', simple: 'Наказания бывают разные: предупреждение, штраф, арест до 30 суток. Это не судимость, но запись остаётся.' },
+        ]
+      },
+      {
+        title: 'Глава 2 · Нарушения общественного порядка',
+        articles: [
+          { num: 'Статья 434', title: 'Мелкое хулиганство', text: 'Нецензурная брань в общественных местах, оскорбительное приставание к физическим лицам и другие подобные действия, выражающие неуважение к окружающим, нарушающие общественный порядок и спокойствие физических лиц, — влекут штраф в размере 20 МРП или общественные работы от 20 до 60 часов либо административный арест от 5 до 15 суток.', simple: 'Матерись в общественном месте, пристань к людям — это мелкое хулиганство. Штраф около 73 000 тенге или арест до 15 суток.' },
+          { num: 'Статья 437', title: 'Нарушение тишины', text: 'Нарушение тишины в ночное время (с 23:00 до 6:00 часов утра), в том числе проведение сопровождаемых шумом работ, — влечёт штраф в размере 5 МРП.', simple: 'Шуметь ночью с 23:00 до 6:00 — административное нарушение. Штраф около 18 000 тенге.' },
+          { num: 'Статья 440', title: 'Появление в пьяном виде', text: 'Появление в общественных местах в состоянии опьянения, оскорбляющем человеческое достоинство и общественную нравственность, — влечёт штраф в размере 5 МРП.', simple: 'Появиться в публичном месте пьяным — нарушение. Оскорбительное поведение в опьянении наказывается штрафом.' },
+        ]
+      },
+      {
+        title: 'Глава 3 · Правонарушения в сфере образования и прав несовершеннолетних',
+        articles: [
+          { num: 'Статья 435', title: 'Хулиганство несовершеннолетним', text: 'Хулиганство, совершённое несовершеннолетним в возрасте от 14 до 16 лет, — влечёт штраф на родителей или лиц, их заменяющих, в размере 7 МРП.', simple: 'Если подросток до 16 лет хулиганит — штраф платят его родители. Ответственность на семье.' },
+          { num: 'Статья 130', title: 'Ненадлежащее воспитание детей', text: 'Ненадлежащее исполнение родителями или иными законными представителями обязанностей по воспитанию и обучению несовершеннолетних — влечёт предупреждение или штраф в размере 5 МРП.', simple: 'Родители обязаны воспитывать и учить детей. За ненадлежащее выполнение этих обязанностей — административная ответственность.' },
+          { num: 'Статья 396', title: 'Нарушение законодательства об образовании', text: 'Уклонение родителей от обеспечения детей обязательным средним образованием — влечёт предупреждение или штраф в размере 5 МРП.', simple: 'Родители обязаны обеспечить ребёнку среднее образование. Не пускать в школу без причины — нарушение закона.' },
+        ]
+      },
+      {
+        title: 'Глава 4 · Правонарушения в сфере труда',
+        articles: [
+          { num: 'Статья 87', title: 'Нарушение трудового законодательства', text: 'Нарушение работодателем трудового законодательства — влечёт штраф на должностных лиц в размере 20 МРП, на субъекты малого предпринимательства — 40 МРП, на крупные организации — до 200 МРП.', simple: 'Если работодатель нарушает твои права — это административное нарушение. За это предусмотрен штраф. Можно жаловаться в инспекцию труда.' },
+          { num: 'Статья 90', title: 'Задержка выплаты заработной платы', text: 'Невыплата или несвоевременная выплата заработной платы работодателем — влечёт штраф на должностных лиц в размере 20 МРП, на малый бизнес — 40 МРП.', simple: 'Задержка зарплаты — административное нарушение. Работодателю грозит штраф, а ты можешь обратиться в государственную инспекцию труда.' },
+        ]
+      }
+    ]
+  },
+  civil: {
+    tag: 'Гражданский кодекс Республики Казахстан · 1994',
+    title: 'Гражданский кодекс',
+    desc: 'Регулирует отношения между людьми и организациями: собственность, договоры, защита личных прав.',
+    chapters: [
+      {
+        title: 'Личные права и дееспособность',
+        articles: [
+          { num: 'Статья 14', title: 'Правоспособность', text: 'Правоспособность гражданина возникает в момент его рождения и прекращается смертью. Все граждане равны в правоспособности.', simple: 'Права у тебя есть с рождения. Тебя не могут их лишить просто так.' },
+          { num: 'Статья 17', title: 'Дееспособность несовершеннолетних', text: 'Несовершеннолетние от 14 до 18 лет вправе самостоятельно совершать мелкие бытовые сделки, распоряжаться своим заработком.', simple: 'С 14 лет ты можешь самостоятельно тратить свои деньги и делать небольшие покупки.' },
+          { num: 'Статья 141', title: 'Защита чести и достоинства', text: 'Гражданин вправе требовать по суду опровержения сведений, порочащих его честь, достоинство или деловую репутацию.', simple: 'Если кто-то распространяет о тебе ложь — ты можешь потребовать опровержения через суд.' },
+          { num: 'Статья 143', title: 'Защита личной жизни', text: 'Никто не вправе без согласия гражданина собирать, хранить и распространять сведения о его личной и семейной жизни.', simple: 'Твои личные данные, фото, история — это твоя собственность. Распространять без согласия — незаконно.' },
+        ]
+      }
+    ]
+  }
+};
+
+let currentCode = 'constitution';
+function showCode(el, code) {
+  document.querySelectorAll('.law-tab').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  currentCode = code;
+  renderCurrentCode();
+}
+function renderCurrentCode() {
+  const data = LAWS[currentCode];
+  if (!data) return;
+  let html = `<div class="law-page-header">
+    <p class="law-page-tag">${data.tag}</p>
+    <h1 class="law-page-title">${data.title}</h1>
+    <p class="law-page-desc">${data.desc}</p>
+  </div>`;
+  data.chapters.forEach(ch => {
+    html += `<div class="chapter"><div class="chapter-title">${ch.title}</div>`;
+    ch.articles.forEach(a => {
+      html += `<div class="article">
+        <div class="article-num">${a.num}</div>
+        <div class="article-title">${a.title}</div>
+        <div class="article-text">${a.text}</div>
+        <div class="article-text" style="margin-top:0.75rem;color:rgba(240,236,226,0.75)"><strong>Простыми словами:</strong> ${a.simple}</div>
+        <span class="simplified-badge">✓ упрощённая версия</span>
+      </div>`;
+    });
+    html += '</div>';
+  });
+  const el = document.getElementById('lawsContent');
+  el.innerHTML = html;
+  el.scrollTop = 0;
+}
+
+// ==================== TESTS DATA ====================
+const TESTS = [
+  {
+    id: 'rights-basic',
+    emoji: '⚖️',
+    title: 'Основные права человека',
+    desc: 'Базовые права, гарантированные Конституцией РК.',
+    level: 'easy', levelLabel: 'Начальный',
+    questions: 5,
+    time: '3 мин',
+    quiz: [
+      { q: 'С какого момента у человека возникают права согласно Гражданскому кодексу РК?', opts: ['С 16 лет','С рождения','С 18 лет','Со момента получения паспорта'], answer: 1, explain: 'Статья 14 ГК РК: правоспособность гражданина возникает в момент рождения и прекращается смертью.' },
+      { q: 'Что гарантирует Статья 30 Конституции РК?', opts: ['Бесплатный интернет','Бесплатное высшее образование','Бесплатное среднее образование','Бесплатное питание в школе'], answer: 2, explain: 'Конституция РК гарантирует бесплатное среднее образование в государственных учебных заведениях.' },
+      { q: 'Можно ли лишить гражданина РК гражданства?', opts: ['Да, за любое преступление','Да, по решению суда','Нет, это запрещено Конституцией','Да, если он уехал за рубеж'], answer: 2, explain: 'Статья 10 Конституции: гражданин РК не может быть лишён гражданства.' },
+      { q: 'Что означает принцип равенства перед законом?', opts: ['Все платят одинаковые налоги','Дискриминация запрещена, все равны','Все получают одинаковое наказание','Все имеют одинаковый доход'], answer: 1, explain: 'Статья 14 Конституции: все равны перед законом и судом. Дискриминация по полу, расе, религии запрещена.' },
+      { q: 'Жилище является неприкосновенным согласно Конституции. Когда можно войти без разрешения?', opts: ['Когда угодно','Только по решению суда','По просьбе соседей','Если полиция считает нужным'], answer: 1, explain: 'Статья 25 Конституции: жилище неприкосновенно. Лишение жилища и проникновение допускается только по решению суда.' }
+    ]
+  },
+  {
+    id: 'child-rights',
+    emoji: '🧒',
+    title: 'Права ребёнка',
+    desc: 'Специальный закон РК "О правах ребёнка". Что знает о своих правах каждый школьник?',
+    level: 'easy', levelLabel: 'Начальный',
+    questions: 5,
+    time: '3 мин',
+    quiz: [
+      { q: 'До какого возраста человек считается ребёнком по закону РК?', opts: ['До 14 лет','До 16 лет','До 18 лет','До 21 года'], answer: 2, explain: 'По закону РК "О правах ребёнка" ребёнком считается каждый человек до 18 лет.' },
+      { q: 'Что является нарушением закона "О правах ребёнка"?', opts: ['Просьба убрать комнату','Психологическое давление и унижение','Просьба учиться','Установка комендантского часа'], answer: 1, explain: 'Статья 9: ребёнок имеет право на защиту от всех форм физического и психологического насилия.' },
+      { q: 'Имеет ли ребёнок право выражать своё мнение?', opts: ['Нет, только после 18 лет','Да, и оно должно приниматься во внимание','Только в суде','Только с разрешения родителей'], answer: 1, explain: 'Статья 11: ребёнок имеет право свободно выражать своё мнение в семье и обществе.' },
+      { q: 'Защищает ли закон личную переписку и личное пространство ребёнка?', opts: ['Нет','Только с 16 лет','Да, с момента рождения','Только в школе'], answer: 2, explain: 'Статья 16: ребёнок имеет право на личную жизнь, неприкосновенность корреспонденции и личного пространства.' },
+      { q: 'Буллинг (систематическое унижение) в школе — это...', opts: ['Нормальная часть жизни','Нарушение закона, ребёнок имеет право на защиту','Проблема только семьи','Ответственность только учителей'], answer: 1, explain: 'Закон РК "О правах ребёнка" прямо защищает от всех форм насилия, в том числе психологического. Буллинг — нарушение прав.' }
+    ]
+  },
+  {
+    id: 'labor',
+    emoji: '💼',
+    title: 'Трудовые права',
+    desc: 'Трудовой кодекс РК. Знаешь ли ты свои права как работник?',
+    level: 'medium', levelLabel: 'Средний',
+    questions: 4,
+    time: '3 мин',
+    quiz: [
+      { q: 'Сколько максимально часов в неделю можно работать по Трудовому кодексу РК?', opts: ['48 часов','36 часов','40 часов','50 часов'], answer: 2, explain: 'Статья 68 ТК РК: нормальная продолжительность рабочего времени не должна превышать 40 часов в неделю.' },
+      { q: 'Сколько дней оплачиваемого отпуска гарантирует ТК РК?', opts: ['14 дней','24 дня','30 дней','20 дней'], answer: 1, explain: 'Статья 88 ТК РК: основной оплачиваемый ежегодный оплачиваемый отпуск — 24 календарных дня.' },
+      { q: 'С какого возраста разрешён официальный труд в Казахстане?', opts: ['С 14 лет','С 16 лет (с 14 — только лёгкий с согласия родителей)','С 18 лет','С 15 лет'], answer: 1, explain: 'Статья 179 ТК РК: трудовой договор нельзя заключить до 16 лет. С 15 лет — только с письменного согласия одного из родителей.' },
+      { q: 'Если работодатель задерживает зарплату — это...', opts: ['Его право','Нарушение трудового законодательства','Нормальная практика','Допустимо до 3 месяцев'], answer: 1, explain: 'ТК РК гарантирует своевременную оплату труда. Задержка зарплаты — нарушение закона, за которое предусмотрена ответственность.' }
+    ]
+  },
+  {
+    id: 'criminal-basics',
+    emoji: '🚨',
+    title: 'Уголовная ответственность',
+    desc: 'Когда наступает ответственность? Что является преступлением?',
+    level: 'hard', levelLabel: 'Сложный',
+    questions: 5,
+    time: '4 мин',
+    quiz: [
+      { q: 'С какого возраста в РК наступает общая уголовная ответственность?', opts: ['С 14 лет','С 16 лет','С 18 лет','С 21 года'], answer: 1, explain: 'Статья 15 УК РК: общая уголовная ответственность наступает с 16 лет. За тяжкие преступления (убийство, кража, грабёж) — с 14 лет.' },
+      { q: 'Является ли угроза убийством уголовным преступлением в РК?', opts: ['Нет, только реальные действия','Да, наказывается штрафом или ограничением свободы до 2 лет','Нет, это лишь слова','Только если есть свидетели'], answer: 1, explain: 'Статья 115 УК РК: угроза убийством или тяжким вредом здоровью, если были основания опасаться её осуществления — уголовное преступление.' },
+      { q: 'Если тебя ударил сверстник в школе — это...', opts: ['Только школьный конфликт','Административное нарушение','Уголовное правонарушение (побои)','Ничего серьёзного'], answer: 2, explain: 'Статья 109-1 УК РК: нанесение побоев — уголовное правонарушение. Даже один удар, причинивший боль, попадает под статью.' },
+      { q: 'Что такое сталкинг по УК РК?', opts: ['Слежка в интернете','Систематическое преследование: слежка, нежелательные контакты, угрозы','Оскорбление в соцсетях','Взлом аккаунта'], answer: 1, explain: 'Статья 115-1 УК РК: сталкинг — систематическое преследование, слежка, нежелательные контакты или угрозы. Наказывается штрафом или ограничением свободы до 1 года.' },
+      { q: 'Распространение чужих личных фото без согласия — это...', opts: ['Нормальная практика','Нарушение ГК РК (статья 143)','Допустимо если фото публичное','Нарушение только если данные секретные'], answer: 1, explain: 'Статья 143 ГК РК: никто не вправе без согласия собирать и распространять сведения о личной жизни, в том числе фотографии.' }
+    ]
+  },
+  {
+    id: 'admin-violations',
+    emoji: '🚔',
+    title: 'Административные правонарушения',
+    desc: 'КоАП РК — что грозит за нарушения общественного порядка, тишины и другие проступки.',
+    level: 'easy', levelLabel: 'Начальный',
+    questions: 5,
+    time: '3 мин',
+    quiz: [
+      { q: 'С какого возраста наступает административная ответственность в РК?', opts: ['С 14 лет','С 16 лет','С 18 лет','С 21 года'], answer: 1, explain: 'Статья 29 КоАП РК: административной ответственности подлежит лицо, достигшее 16 лет. До 16 лет — ответственность несут родители.' },
+      { q: 'Что является мелким хулиганством по КоАП РК?', opts: ['Опоздание в школу','Нецензурная брань в общественных местах и оскорбительное приставание к людям','Громкая музыка дома днём','Спор с учителем'], answer: 1, explain: 'Статья 434 КоАП РК: мелкое хулиганство — нецензурная брань в общественных местах, оскорбительное приставание. Штраф 20 МРП или арест 5–15 суток.' },
+      { q: 'До какого часа ночью нельзя шуметь по КоАП РК?', opts: ['До 22:00','До 23:00','До 00:00','До 01:00'], answer: 1, explain: 'Статья 437 КоАП РК: нарушение тишины в ночное время с 23:00 до 6:00 — административное нарушение. Штраф 5 МРП.' },
+      { q: 'Если подросток до 16 лет совершил хулиганство — кто несёт ответственность?', opts: ['Сам подросток','Его родители или законные представители','Школа','Никто'], answer: 1, explain: 'Статья 435 КоАП РК: за хулиганство несовершеннолетнего до 16 лет штраф налагается на родителей или лиц, их заменяющих.' },
+      { q: 'Что грозит работодателю за задержку зарплаты?', opts: ['Ничего','Административный штраф по КоАП РК','Уголовная ответственность сразу','Только предупреждение'], answer: 1, explain: 'Статья 90 КоАП РК: задержка выплаты заработной платы — административное нарушение. Штраф на должностных лиц — 20 МРП, на организации — до 200 МРП.' }
+    ]
+  },
+  {
+    id: 'constitution-rights',
+    emoji: '🏛️',
+    title: 'Конституционные права',
+    desc: 'Основные права и свободы по Конституции РК 1995 года — то, что должен знать каждый.',
+    level: 'medium', levelLabel: 'Средний',
+    questions: 5,
+    time: '4 мин',
+    quiz: [
+      { q: 'Какая статья Конституции РК гарантирует право на жизнь?', opts: ['Статья 10','Статья 12','Статья 15','Статья 17'], answer: 2, explain: 'Статья 15 Конституции РК: каждый имеет право на жизнь. Смертная казнь в Казахстане запрещена.' },
+      { q: 'Что гарантирует статья 17 Конституции РК?', opts: ['Право на жизнь','Неприкосновенность личности — запрет пыток и унижений','Право на образование','Свободу слова'], answer: 1, explain: 'Статья 17 Конституции РК: достоинство человека неприкосновенно. Никто не должен подвергаться пыткам, насилию или унижающему обращению.' },
+      { q: 'Можно ли задержать человека без санкции суда и на сколько?', opts: ['Нет, нельзя вообще','Да, не более 72 часов','Да, не более 24 часов','Да, не более 48 часов'], answer: 1, explain: 'Статья 16 Конституции РК: без санкции суда лицо может быть задержано на срок не более 72 часов. Далее необходима санкция суда.' },
+      { q: 'Что означает принцип равенства перед законом (ст. 14 Конституции)?', opts: ['Все получают одинаковую зарплату','Запрет дискриминации по полу, расе, национальности, религии','Все платят одинаковые налоги','Все имеют одинаковые льготы'], answer: 1, explain: 'Статья 14 Конституции РК: все равны перед законом и судом. Дискриминация по полу, расе, национальности, языку, религии — запрещена.' },
+      { q: 'Гарантирует ли Конституция РК бесплатное среднее образование?', opts: ['Нет, образование платное','Да, статья 30 гарантирует бесплатное среднее образование в госучреждениях','Только для отличников','Только до 9 класса'], answer: 1, explain: 'Статья 30 Конституции РК: гражданам гарантируется бесплатное среднее образование в государственных учебных заведениях. Оно является обязательным.' }
+    ]
+  },
+  {
+    id: 'consumer-rights',
+    emoji: '🛒',
+    title: 'Права потребителя',
+    desc: 'Закон РК "О защите прав потребителей". Что делать при некачественном товаре или обмане?',
+    level: 'medium', levelLabel: 'Средний',
+    questions: 5,
+    time: '4 мин',
+    quiz: [
+      { q: 'В течение какого срока можно вернуть товар надлежащего качества в магазин?', opts: ['3 дня','7 дней','14 дней','30 дней'], answer: 2, explain: 'Закон РК "О защите прав потребителей": товар надлежащего качества можно вернуть или обменять в течение 14 дней, если он не был в употреблении и сохранён товарный вид.' },
+      { q: 'Что ты вправе требовать при обнаружении брака в товаре?', opts: ['Только скидку','Только замену товара','Замену, ремонт, возврат денег или соразмерное уменьшение цены — на выбор','Только извинения'], answer: 2, explain: 'Закон РК "О защите прав потребителей": при обнаружении недостатков потребитель вправе по своему выбору требовать замены, безвозмездного устранения, уменьшения цены или возврата денег.' },
+      { q: 'Обязан ли продавец предоставлять чек при покупке?', opts: ['Нет, чек необязателен','Да, продавец обязан выдать чек или иной документ об оплате','Только при покупке свыше 10 000 тенге','Только если покупатель просит'], answer: 1, explain: 'Закон РК "О защите прав потребителей": продавец обязан выдать покупателю кассовый чек или иной документ, подтверждающий оплату товара.' },
+      { q: 'Куда обратиться если магазин отказывает в возврате некачественного товара?', opts: ['Никуда, это бесполезно','В Комитет по защите прав потребителей или суд','Только к директору магазина','Только в прокуратуру'], answer: 1, explain: 'При нарушении прав потребителя можно обратиться в уполномоченный орган по защите прав потребителей, общество защиты прав потребителей или суд.' },
+      { q: 'Распространяется ли защита прав потребителей на покупки в интернете?', opts: ['Нет, только офлайн-магазины','Да, онлайн-покупки тоже защищены законом','Только на казахстанские сайты','Только если есть договор'], answer: 1, explain: 'Закон РК "О защите прав потребителей" распространяется на дистанционную торговлю, включая интернет-магазины. Права те же, что и при офлайн-покупке.' }
+    ]
+  },
+  {
+    id: 'civil-rights',
+    emoji: '📜',
+    title: 'Гражданские права',
+    desc: 'Гражданский кодекс РК — собственность, личные права, дееспособность несовершеннолетних.',
+    level: 'medium', levelLabel: 'Средний',
+    questions: 5,
+    time: '4 мин',
+    quiz: [
+      { q: 'С какого возраста несовершеннолетний может самостоятельно распоряжаться своим заработком?', opts: ['С 12 лет','С 14 лет','С 16 лет','С 18 лет'], answer: 1, explain: 'Статья 17 ГК РК: несовершеннолетние от 14 до 18 лет вправе самостоятельно совершать мелкие бытовые сделки и распоряжаться своим заработком или стипендией.' },
+      { q: 'Что можно сделать если кто-то распространяет о тебе ложную информацию?', opts: ['Ничего','Потребовать опровержения через суд (ст. 141 ГК РК)','Только написать жалобу в школу','Только попросить удалить'], answer: 1, explain: 'Статья 141 ГК РК: гражданин вправе требовать по суду опровержения сведений, порочащих его честь, достоинство или деловую репутацию.' },
+      { q: 'С какого момента у человека возникают гражданские права по ГК РК?', opts: ['С 16 лет','С 18 лет','С момента рождения','С получения паспорта'], answer: 2, explain: 'Статья 14 ГК РК: правоспособность гражданина возникает в момент рождения и прекращается смертью. Права есть у каждого с первого дня жизни.' },
+      { q: 'Можно ли публиковать чужие фото без разрешения?', opts: ['Да, если фото сделано в публичном месте','Да, если человек знаменитость','Нет, нужно согласие — статья 143 ГК РК','Да, в соцсетях это разрешено'], answer: 2, explain: 'Статья 143 ГК РК: никто не вправе без согласия гражданина собирать, хранить и распространять сведения о его личной жизни, включая фотографии.' },
+      { q: 'Что означает полная дееспособность в ГК РК?', opts: ['Право голосовать','Способность своими действиями приобретать и осуществлять все гражданские права и обязанности','Право работать','Право водить машину'], answer: 1, explain: 'ГК РК: полная дееспособность наступает с 18 лет. С этого момента человек несёт полную ответственность за свои действия и может самостоятельно совершать любые сделки.' }
+    ]
+  },
+  {
+    id: 'police-rights',
+    emoji: '👮',
+    title: 'Права при задержании',
+    desc: 'Что делать если тебя остановила полиция? Твои права при задержании по Конституции и УПК РК.',
+    level: 'hard', levelLabel: 'Сложный',
+    questions: 5,
+    time: '5 мин',
+    quiz: [
+      { q: 'Имеет ли полицейский право остановить тебя на улице без причины?', opts: ['Да, в любое время','Нет, должны быть законные основания — подозрение в правонарушении','Да, если ты выглядишь подозрительно','Да, в ночное время'], answer: 1, explain: 'Конституция РК и Закон "О полиции": сотрудник полиции обязан назвать основание остановки. Остановка без оснований — нарушение прав.' },
+      { q: 'Что ты имеешь право сделать сразу после задержания?', opts: ['Ничего, нужно молчать','Позвонить родителям или адвокату и узнать причину задержания','Только подписать протокол','Только ждать'], answer: 1, explain: 'Статья 16 Конституции РК: каждый задержанный имеет право пользоваться помощью адвоката с момента задержания и должен быть уведомлён о причине задержания.' },
+      { q: 'Сколько максимум часов можно держать под стражей без санкции суда?', opts: ['24 часа','48 часов','72 часа','96 часов'], answer: 2, explain: 'Статья 16 Конституции РК: без санкции суда лицо может быть задержано на срок не более 72 часов. После этого необходима судебная санкция.' },
+      { q: 'Обязан ли полицейский назвать своё имя и показать удостоверение?', opts: ['Нет, это необязательно','Да, по требованию гражданина обязан','Только в отделе','Только если гражданин сам представился'], answer: 1, explain: 'Закон РК "О правоохранительной службе": сотрудник полиции обязан при обращении к гражданину назвать свои должность, звание и фамилию, а по требованию — предъявить удостоверение.' },
+      { q: 'Если несовершеннолетнего задержали — кого обязаны уведомить?', opts: ['Никого','Только директора школы','Родителей или законных представителей — немедленно','Только прокурора'], answer: 2, explain: 'УПК РК и Закон "О правах ребёнка": при задержании несовершеннолетнего органы обязаны немедленно уведомить его родителей или законных представителей.' }
+    ]
+  }
+];
+
+function renderTests() {
+  const grid = document.getElementById('testsGrid');
+  if (grid.innerHTML) return;
+  grid.innerHTML = TESTS.map(t => `
+    <div class="test-card" onclick="startQuiz('${t.id}')">
+      <div class="test-card-top">
+        <span class="test-card-emoji">${t.emoji}</span>
+        <span class="test-card-level level-${t.level}">${t.levelLabel}</span>
+      </div>
+      <h3>${t.title}</h3>
+      <p>${t.desc}</p>
+      <div class="test-meta">
+        <span>${t.questions} вопросов</span>
+        <span>~${t.time}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ==================== QUIZ LOGIC ====================
+let quizState = {};
+function startQuiz(id) {
+  const test = TESTS.find(t => t.id === id);
+  quizState = { test, idx: 0, score: 0 };
+  document.getElementById('quizOverlay').classList.add('open');
+  renderQuestion();
+}
+function closeQuiz() {
+  document.getElementById('quizOverlay').classList.remove('open');
+}
+function renderQuestion() {
+  const { test, idx } = quizState;
+  const total = test.quiz.length;
+  document.getElementById('quizProgress').style.width = ((idx / total) * 100) + '%';
+  if (idx >= total) { renderResult(); return; }
+  const q = test.quiz[idx];
+  document.getElementById('quizInner').innerHTML = `
+    <div class="quiz-counter">Вопрос ${idx + 1} из ${total} · ${test.title}</div>
+    <div class="quiz-question">${q.q}</div>
+    <div class="quiz-options">
+      ${q.opts.map((o, i) => `<button class="quiz-option" onclick="selectAnswer(${i})">${o}</button>`).join('')}
+    </div>
+    <div class="quiz-feedback" id="qFeedback"></div>
+    <button class="quiz-next" id="qNext" onclick="nextQuestion()">${idx + 1 < total ? 'Следующий вопрос →' : 'Завершить тест'}</button>
+  `;
+}
+function selectAnswer(i) {
+  const q = quizState.test.quiz[quizState.idx];
+  const opts = document.querySelectorAll('.quiz-option');
+  opts.forEach(o => o.disabled = true);
+  const feedback = document.getElementById('qFeedback');
+  const next = document.getElementById('qNext');
+  if (i === q.answer) {
+    opts[i].classList.add('correct');
+    quizState.score++;
+    feedback.className = 'quiz-feedback show good';
+    feedback.textContent = '✓ Верно! ' + q.explain;
+  } else {
+    opts[i].classList.add('wrong');
+    opts[q.answer].classList.add('correct');
+    feedback.className = 'quiz-feedback show bad';
+    feedback.textContent = '✗ Неверно. ' + q.explain;
+  }
+  next.classList.add('show');
+}
+function nextQuestion() {
+  quizState.idx++;
+  renderQuestion();
+}
+function renderResult() {
+  const { test, score } = quizState;
+  const total = test.quiz.length;
+  const pct = Math.round((score / total) * 100);
+  document.getElementById('quizProgress').style.width = '100%';
+  const msg = pct >= 80 ? 'Отлично! Ты хорошо знаешь свои права.' :
+              pct >= 60 ? 'Неплохо! Есть что закрепить — перечитай кодексы.' :
+              'Стоит изучить тему подробнее. Загляни в раздел Кодексы.';
+  document.getElementById('quizInner').innerHTML = `
+    <div class="quiz-result">
+      <div class="quiz-result-score">${pct}%</div>
+      <div class="quiz-result-label">${score} из ${total} правильных ответов</div>
+      <div class="quiz-result-msg">${msg}</div>
+      <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-gold" onclick="startQuiz('${test.id}')">Пройти снова</button>
+        <button class="btn btn-outline" onclick="closeQuiz();showPage('laws')">Изучить кодексы</button>
+      </div>
+    </div>
+  `;
+}
+
+// ==================== AI CHAT ====================
+const GEMINI_API_KEY = 'AIzaSyCn0ShqEAZvGxOqJypmwk-aJDxJXO8zU78';
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+const SYSTEM_PROMPT = `Ты — ZanUp, правовой ассистент для молодёжи в Казахстане. Твоя задача — объяснять законы Казахстана простым и понятным языком, особенно подросткам и молодым людям.
+
+Правила ответов:
+1. Всегда ссылайся на ТОЧНЫЕ статьи законов РК с правильными номерами: Конституция РК, Трудовой кодекс РК № 414-V от 2015 г., Уголовный кодекс РК № 226-V от 2014 г., Гражданский кодекс РК, Закон РК "О правах ребёнка" 2002 г.
+2. Используй актуальные данные — законы РК регулярно обновляются.
+3. Объясняй сложные юридические термины простыми словами.
+4. Давай практические советы — что конкретно делать в ситуации.
+5. Структура ответа: СУТЬ → ЗАКОН (точная статья) → ЧТО ДЕЛАТЬ.
+6. В конце всегда добавляй: "⚠ Это информация для просвещения. В серьёзных ситуациях обратись к юристу или родителям."
+
+Отвечай на русском языке. Используй теги <strong> для выделения важного.`;
+
+let chatHistory = [];
+async function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  input.style.height = 'auto';
+
+  addMsg('user', text);
+  chatHistory.push({ role: 'user', parts: [{ text }] });
+
+  const typingId = addTyping();
+  try {
+    const res = await fetch(GEMINI_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+        contents: chatHistory,
+        tools: [{ google_search: {} }]
+      })
+    });
+    const data = await res.json();
+    removeTyping(typingId);
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Произошла ошибка. Попробуй снова.';
+    addMsg('assistant', reply);
+    chatHistory.push({ role: 'model', parts: [{ text: reply }] });
+  } catch (e) {
+    removeTyping(typingId);
+    addMsg('assistant', '<strong>Ошибка соединения.</strong> Проверь подключение к интернету и попробуй снова.');
+  }
+}
+
+function addMsg(role, text) {
+  const container = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  div.innerHTML = `
+    <div class="msg-avatar">${role === 'assistant' ? 'Z' : 'Я'}</div>
+    <div class="msg-bubble">${text}</div>
+  `;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  return div;
+}
+
+let typingCounter = 0;
+function addTyping() {
+  const id = ++typingCounter;
+  const container = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'msg assistant';
+  div.id = 'typing-' + id;
+  div.innerHTML = `<div class="msg-avatar">Z</div><div class="msg-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  return id;
+}
+function removeTyping(id) {
+  const el = document.getElementById('typing-' + id);
+  if (el) el.remove();
+}
+
+function setTopic(el, text) {
+  document.querySelectorAll('.sidebar-topic').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const input = document.getElementById('chatInput');
+  input.value = text;
+  input.focus();
+}
+
+// Init
+renderCurrentCode();
+</script>
+</body>
+</html>
