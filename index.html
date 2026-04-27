@@ -1068,7 +1068,6 @@ async function sendMessage() {
   const input = document.getElementById('chatInput');
   const text = input.value.trim();
   if (!text) return;
-
   // 1. Добавляем сообщение пользователя в чат
   addMsg('user', text);
   input.value = '';
