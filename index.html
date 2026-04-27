@@ -1056,7 +1056,7 @@ function renderResult() {
 }
 
 // ==================== AI CHAT ====================
-const GEMINI_API_KEY = 'AIzaSyCn0ShqEAZvGxOqJypmwk-aJDxJXO8zU78';
+const GEMINI_API_KEY = 'AIzaSyB2PxKJP8weconzQn2yVv1LzKCUEuaAfXA';
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
 const SYSTEM_PROMPT = `Ты — ZanUp, правовой ассистент для молодёжи в Казахстане. Твоя задача — объяснять законы Казахстана простым и понятным языком, особенно подросткам и молодым людям.
@@ -1089,8 +1089,7 @@ async function sendMessage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-        contents: chatHistory,
-        tools: [{ google_search: {} }]
+        contents: chatHistory
       })
     });
     const data = await res.json();
